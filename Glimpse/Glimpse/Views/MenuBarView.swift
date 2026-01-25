@@ -141,7 +141,7 @@ struct MenuBarView: View {
                 selectedTask = task
             }
         }
-        .frame(width: 400, height: 500)
+        .frame(width: 800, height: 750)
         .background(bgDeep)
         .onAppear {
             sessionManager.loadSessions()
@@ -242,7 +242,7 @@ struct SessionListView: View {
                     }
                 }
             }
-            .frame(maxHeight: 200)
+            .frame(maxHeight: 300)
         }
         .padding(8)
         .background(bgElevated)
