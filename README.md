@@ -4,7 +4,7 @@
 
 Monitor your Claude Code tasks in real-time with a sleek Kanban-style popover. No dock icon, no clutter - just glance at your menu bar.
 
-![Glimpse - Kanban task viewer for Claude Code](.github/assets/banner.png)
+![Glimpse - Kanban task viewer for Claude Code](.github/assets/glimpse-banner.png)
 
 ## Features
 
