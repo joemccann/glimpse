@@ -1,0 +1,16 @@
+node_modules/
+.DS_Store
+*.log
+.claude/
+CLAUDE.md
+AGENTS.md
+
+# Swift Package Manager
+.build/
+.swiftpm/
+*.xcodeproj/xcuserdata/
+DerivedData/
+Package.resolved
+
+# Build output
+build/
