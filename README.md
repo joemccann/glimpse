@@ -13,6 +13,7 @@ Monitor your Claude Code tasks in real-time with a sleek Kanban-style popover. N
 - **Real-time updates** - FSEvents file watching for instant changes
 - **Project filtering** - Filter tasks by project, then optionally by session
 - **Session picker** - Switch between sessions or view all tasks at once
+- **Delete orphaned sessions** - Clean up old, completed, or orphaned task sessions
 - **Task details** - View descriptions, dependencies, and add notes
 - **Notifications** - Optional alerts when tasks or sessions complete
 - **Theme support** - System, Light, or Dark mode
@@ -49,6 +50,20 @@ The app bundle will be at `build/Glimpse.app`.
 4. Use the **session picker** to filter by session within that project
 5. Click any task card to view details and add notes
 6. **Right-click** for the context menu (Preferences, Quit)
+
+### Deleting Orphaned Sessions
+
+Sessions are automatically marked as "orphaned" when they:
+- Are older than 30 days
+- Have no matching project in `~/.claude/projects/`
+- Have all tasks completed
+
+To delete a session:
+1. Click the session dropdown to expand the session list
+2. Hover over a session to reveal the delete (trash) icon
+3. Click the trash icon and confirm deletion
+
+Orphaned sessions show a yellow "orphan" badge for easy identification.
 
 ### Preferences
 
