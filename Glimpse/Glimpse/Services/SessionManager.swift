@@ -3,6 +3,23 @@ import Combine
 
 class SessionManager: ObservableObject {
     @Published var sessions: [Session] = []
+    @Published var projects: [Project] = []
+    @Published var selectedProjectId: String?
+    @Published var selectedSessionId: String?
+
+    /// Sessions filtered by selected project (or all if no project selected)
+    var filteredSessions: [Session] {
+        guard let projectId = selectedProjectId else {
+            return sessions
+        }
+        return sessions.filter { $0.project == projectPath(for: projectId) }
+    }
+
+    /// Get the actual path for a project ID
+    private func projectPath(for projectId: String) -> String {
+        "/" + projectId.replacingOccurrences(of: "-", with: "/")
+            .trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+    }
 
     private let claudeDirectory: String
     private let fileManager = FileManager.default
@@ -81,9 +98,69 @@ class SessionManager: ObservableObject {
             }
 
             sessions = loadedSessions.sorted { $0.modifiedAt > $1.modifiedAt }
+            loadProjects()
         } catch {
             print("Error loading sessions: \(error)")
             sessions = []
+        }
+    }
+
+    /// Load projects by grouping sessions by their project path
+    func loadProjects() {
+        var projectMap: [String: Project] = [:]
+
+        guard fileManager.fileExists(atPath: projectsDirectory) else {
+            projects = []
+            return
+        }
+
+        do {
+            let projectDirs = try fileManager.contentsOfDirectory(atPath: projectsDirectory)
+
+            for projectDir in projectDirs {
+                let projectPath = (projectsDirectory as NSString).appendingPathComponent(projectDir)
+                var isDirectory: ObjCBool = false
+
+                guard fileManager.fileExists(atPath: projectPath, isDirectory: &isDirectory),
+                      isDirectory.boolValue else { continue }
+
+                // Convert encoded dir name back to path
+                let actualPath = "/" + projectDir.replacingOccurrences(of: "-", with: "/")
+                    .trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+
+                // Find sessions belonging to this project
+                let projectSessions = sessions.filter { $0.project == actualPath }
+
+                // Only include projects that have sessions with tasks
+                if !projectSessions.isEmpty {
+                    projectMap[projectDir] = Project(
+                        id: projectDir,
+                        path: actualPath,
+                        sessions: projectSessions
+                    )
+                }
+            }
+
+            // Sort projects by most recent activity
+            projects = projectMap.values.sorted {
+                ($0.lastModified ?? .distantPast) > ($1.lastModified ?? .distantPast)
+            }
+        } catch {
+            print("Error loading projects: \(error)")
+            projects = []
+        }
+    }
+
+    /// Select a project and optionally reset session selection
+    func selectProject(_ projectId: String?) {
+        selectedProjectId = projectId
+        // Reset session selection when project changes
+        if selectedSessionId != nil {
+            // Check if selected session is still in filtered list
+            if let sessionId = selectedSessionId,
+               !filteredSessions.contains(where: { $0.id == sessionId }) {
+                selectedSessionId = nil
+            }
         }
     }
 

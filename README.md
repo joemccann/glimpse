@@ -11,6 +11,7 @@ Monitor your Claude Code tasks in real-time with a sleek Kanban-style popover. N
 - **Menu bar native** - Lives quietly in your menu bar with an orange gem icon
 - **Kanban board** - Visual columns for Pending, In Progress, and Completed
 - **Real-time updates** - FSEvents file watching for instant changes
+- **Project filtering** - Filter tasks by project, then optionally by session
 - **Session picker** - Switch between sessions or view all tasks at once
 - **Task details** - View descriptions, dependencies, and add notes
 - **Notifications** - Optional alerts when tasks or sessions complete
@@ -44,8 +45,10 @@ The app bundle will be at `build/Glimpse.app`.
 
 1. Launch Glimpse - an orange gem icon appears in your menu bar
 2. **Left-click** the icon to open the Kanban popover
-3. **Right-click** for the context menu (Preferences, Quit)
-4. Click any task card to view details and add notes
+3. Use the **project picker** to filter by project (shows folder names)
+4. Use the **session picker** to filter by session within that project
+5. Click any task card to view details and add notes
+6. **Right-click** for the context menu (Preferences, Quit)
 
 ### Preferences
 

@@ -5,7 +5,6 @@ struct MenuBarView: View {
     @StateObject private var taskManager = TaskManager()
     @StateObject private var fileWatcher: FileWatcher
 
-    @State private var selectedSessionId: String?
     @State private var selectedTask: Task?
     @State private var searchText = ""
     @State private var sessionToDelete: Session?
@@ -45,8 +44,13 @@ struct MenuBarView: View {
 
     private var currentTasks: [Task] {
         var tasks: [Task]
-        if let sessionId = selectedSessionId {
+        if let sessionId = sessionManager.selectedSessionId {
             tasks = taskManager.loadTasks(sessionId: sessionId)
+        } else if sessionManager.selectedProjectId != nil {
+            // Load tasks from all sessions in the selected project
+            tasks = sessionManager.filteredSessions.flatMap { session in
+                taskManager.loadTasks(sessionId: session.id)
+            }
         } else {
             tasks = taskManager.loadAllTasks()
         }
@@ -62,8 +66,8 @@ struct MenuBarView: View {
     }
 
     private var selectedSessionName: String {
-        if let id = selectedSessionId,
-           let session = sessionManager.sessions.first(where: { $0.id == id }) {
+        if let id = sessionManager.selectedSessionId,
+           let session = sessionManager.filteredSessions.first(where: { $0.id == id }) {
             return session.displayName
         }
         return "All Sessions"
@@ -74,9 +78,9 @@ struct MenuBarView: View {
             // Header
             VStack(spacing: 8) {
                 HStack {
-                    Image(systemName: "checkmark.circle.fill")
+                    Image(systemName: "diamond.fill")
                         .foregroundColor(Theme.accent)
-                    Text("Claude Tasks")
+                    Text("Glimpse")
                         .font(.headline)
                         .foregroundColor(textPrimary)
                     Spacer()
@@ -84,13 +88,19 @@ struct MenuBarView: View {
                     // Active indicator
                     if sessionManager.sessions.contains(where: { $0.hasActiveTasks }) {
                         Circle()
-                            .fill(Theme.accent)
+                            .fill(Theme.success)
                             .frame(width: 8, height: 8)
                     }
                 }
 
+                // Project picker (with built-in dropdown)
+                ProjectPickerView()
+                    .environmentObject(sessionManager)
+
                 // Session picker button
-                Button(action: { showSessionList.toggle() }) {
+                Button(action: {
+                    showSessionList.toggle()
+                }) {
                     HStack {
                         Text(selectedSessionName)
                             .foregroundColor(textPrimary)
@@ -113,8 +123,11 @@ struct MenuBarView: View {
                 // Session list dropdown
                 if showSessionList {
                     SessionListView(
-                        sessions: sessionManager.sessions,
-                        selectedSessionId: $selectedSessionId,
+                        sessions: sessionManager.filteredSessions,
+                        selectedSessionId: Binding(
+                            get: { sessionManager.selectedSessionId },
+                            set: { sessionManager.selectedSessionId = $0 }
+                        ),
                         onSelect: { showSessionList = false },
                         onDelete: { session in
                             sessionToDelete = session
@@ -153,7 +166,7 @@ struct MenuBarView: View {
             TaskDetailView(
                 task: task,
                 onAddNote: { note in
-                    if let sessionId = task.sessionId ?? selectedSessionId {
+                    if let sessionId = task.sessionId ?? sessionManager.selectedSessionId {
                         try? taskManager.addNote(sessionId: sessionId, taskId: task.id, note: note)
                         sessionManager.loadSessions()
                     }
@@ -179,8 +192,8 @@ struct MenuBarView: View {
         do {
             try sessionManager.deleteSession(sessionId: session.id)
             // If we deleted the selected session, reset to all sessions
-            if selectedSessionId == session.id {
-                selectedSessionId = nil
+            if sessionManager.selectedSessionId == session.id {
+                sessionManager.selectedSessionId = nil
             }
         } catch {
             print("Failed to delete session: \(error)")
