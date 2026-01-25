@@ -6,6 +6,32 @@ Monitor your Claude Code tasks in real-time with a sleek Kanban-style popover. N
 
 ![Glimpse - Kanban task viewer for Claude Code](.github/assets/glimpse-banner.png)
 
+## See It In Action
+
+### All your projects, one glance
+
+Switch between Claude Code projects instantly. See task counts and activity indicators at a glance — green dots show where work is happening right now.
+
+![Project picker with multiple projects and task counts](.github/assets/popover-1.png)
+
+### Smart session management
+
+Glimpse automatically detects orphaned sessions — old, completed, or disconnected from their project. Yellow badges flag stale sessions so you can clean up with confidence.
+
+![Session list with orphan detection and cleanup options](.github/assets/popover-3.png)
+
+### Full context when you need it
+
+Click any task to see its complete description, current status, and dependencies. Add your own notes to track decisions or capture next steps without leaving the menu bar.
+
+![Task detail view with description and notes](.github/assets/popover-4.png)
+
+### Safe cleanup, no accidents
+
+Delete sessions with confidence. Glimpse shows exactly what will be removed — task counts, completion status — and requires explicit confirmation before any permanent action.
+
+![Delete confirmation dialog with session details](.github/assets/popover-5.png)
+
 ## Features
 
 - **Menu bar native** - Lives quietly in your menu bar with an orange gem icon
