@@ -4,7 +4,7 @@
 
 Monitor your Claude Code tasks in real-time with a sleek Kanban-style popover. No dock icon, no clutter - just glance at your menu bar.
 
-<!-- Screenshot here -->
+![Glimpse - Kanban task viewer for Claude Code](banner.png)
 
 ## Features
 
@@ -89,6 +89,10 @@ Glimpse/
 ## How it works
 
 Claude Code stores tasks in `~/.claude/tasks/`. Glimpse watches this directory using FSEvents and updates the UI in real-time - no polling required.
+
+## Acknowledgments
+
+Glimpse was inspired by [claude-task-viewer](https://github.com/L1AD/claude-task-viewer), an Electron-based Claude Code task viewer. This project reimagines the concept as a lightweight native macOS menu bar app.
 
 ## License
 
