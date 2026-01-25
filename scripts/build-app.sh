@@ -13,7 +13,7 @@ set -e
 APP_NAME="Glimpse"
 BUNDLE_NAME="Glimpse"
 BUNDLE_ID="com.glimpse.app"
-VERSION="1.2.0"
+VERSION="1.3.0"
 
 # Paths
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
