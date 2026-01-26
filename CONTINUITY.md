@@ -32,17 +32,14 @@ Glimpse - A native macOS menu bar app that displays Claude Code tasks in a Kanba
 
 ### Done
 - Glimpse branding complete
-- Project filtering feature (v1.3.0):
-  - Project model with displayName (folder name)
-  - SessionManager loads and groups projects
-  - ProjectPickerView with hierarchical dropdown
-  - MenuBarView updated with project → session hierarchy
-  - 18 tests passing (including 10 new Project tests)
+- Project filtering feature (v1.3.0)
+- Twitter banner marketing asset generated.
 
 ### Now
-- Feature complete
+- Reviewing UI components for final polish.
 
 ### Next
+- Finalize documentation and prepare for release
 - Commit and merge project filtering feature
 
 ## Open Questions
