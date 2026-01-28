@@ -53,7 +53,7 @@ Delete sessions with confidence. Glimpse shows exactly what will be removed — 
 ### Build from source
 
 ```bash
-git clone https://github.com/your-username/glimpse.git
+git clone https://github.com/joemccann/glimpse.git
 cd glimpse
 ./scripts/build-app.sh --install
 ```
