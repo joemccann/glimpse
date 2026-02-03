@@ -50,6 +50,14 @@ Delete sessions with confidence. Glimpse shows exactly what will be removed — 
 
 ## Installation
 
+### Download
+
+Download the latest `.dmg` from [GitHub Releases](https://github.com/joemccann/glimpse/releases):
+
+1. Download `Glimpse-x.x.x.dmg`
+2. Open the DMG and drag Glimpse to Applications
+3. Launch from Applications or Spotlight
+
 ### Build from source
 
 ```bash
