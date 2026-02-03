@@ -153,6 +153,42 @@ struct MenuBarView: View {
             KanbanView(tasks: currentTasks) { task in
                 selectedTask = task
             }
+
+            // Footer
+            HStack {
+                Button("Quit") {
+                    NSApp.terminate(nil)
+                }
+                .buttonStyle(.plain)
+                .foregroundColor(textPrimary)
+
+                Spacer()
+
+                // Active sessions indicator
+                HStack(spacing: 6) {
+                    Circle()
+                        .fill(sessionManager.sessions.contains(where: { $0.hasActiveTasks }) ? Theme.success : textSecondary)
+                        .frame(width: 8, height: 8)
+                    Text("\(sessionManager.sessions.count) sessions")
+                        .font(.caption)
+                        .foregroundColor(textSecondary)
+                }
+
+                Spacer()
+
+                Button(action: {
+                    AppDelegate.shared?.openPreferences()
+                }) {
+                    Image(systemName: "gearshape")
+                        .font(.system(size: 14))
+                        .foregroundColor(textSecondary)
+                }
+                .buttonStyle(.plain)
+                .help("Preferences")
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .background(bgSurface)
         }
         .frame(width: 800, height: 750)
         .background(bgDeep)

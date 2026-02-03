@@ -2,10 +2,14 @@ import Cocoa
 import SwiftUI
 
 class AppDelegate: NSObject, NSApplicationDelegate {
+    static var shared: AppDelegate?
+
     var statusItem: NSStatusItem?
     var popover: NSPopover?
+    var preferencesWindow: NSWindow?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        AppDelegate.shared = self
         performAutoCleanupIfEnabled()
         setupMenuBar()
     }
@@ -90,7 +94,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc func openPreferences() {
-        NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+        // Close popover first
+        popover?.performClose(nil)
+
+        if preferencesWindow == nil {
+            let preferencesView = PreferencesView()
+            let hostingController = NSHostingController(rootView: preferencesView)
+
+            preferencesWindow = NSWindow(contentViewController: hostingController)
+            preferencesWindow?.title = "Glimpse Preferences"
+            preferencesWindow?.styleMask = [.titled, .closable]
+            preferencesWindow?.setContentSize(NSSize(width: 450, height: 380))
+            preferencesWindow?.center()
+            preferencesWindow?.isReleasedWhenClosed = false
+        }
+
+        preferencesWindow?.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
     }
 
     @objc func quit() {
