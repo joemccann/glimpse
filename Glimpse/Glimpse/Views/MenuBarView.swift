@@ -220,8 +220,18 @@ struct MenuBarView: View {
             .padding(.vertical, 10)
             .background(bgSurface)
         }
-        .frame(width: 800, height: 750)
+        .frame(
+            minWidth: AppDelegate.minWidth,
+            maxWidth: AppDelegate.maxWidth,
+            minHeight: AppDelegate.minHeight,
+            maxHeight: AppDelegate.maxHeight
+        )
         .background(bgDeep)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(borderColor.opacity(0.5), lineWidth: 1)
+        )
         .onAppear {
             sessionManager.loadSessions()
             fileWatcher.start {
