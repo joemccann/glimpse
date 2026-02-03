@@ -94,4 +94,121 @@ final class SessionDeleteTests: XCTestCase {
             XCTAssertNotNil(error)
         }
     }
+
+    // MARK: - Empty Session Tests
+
+    func testEmptySessionIsOrphan() throws {
+        // Create a session with NO tasks but with a matching project
+        let tasksDir = tempDir.appendingPathComponent("tasks")
+        let sessionDir = tasksDir.appendingPathComponent("empty-session")
+        try FileManager.default.createDirectory(at: sessionDir, withIntermediateDirectories: true)
+
+        // Create matching project so isEmpty is the only orphan reason
+        let projectDir = tempDir.appendingPathComponent("projects/-test-project")
+        try FileManager.default.createDirectory(at: projectDir, withIntermediateDirectories: true)
+        try """
+        {"type":"custom-title","customTitle":"Empty Project"}
+        """.write(to: projectDir.appendingPathComponent("empty-session.jsonl"), atomically: true, encoding: .utf8)
+
+        sessionManager.loadSessions()
+
+        guard let session = sessionManager.sessions.first(where: { $0.id == "empty-session" }) else {
+            XCTFail("Session not found")
+            return
+        }
+
+        XCTAssertTrue(session.isEmpty)
+        XCTAssertTrue(session.isOrphan)
+        XCTAssertEqual(session.orphanReason, "No tasks")
+    }
+
+    // MARK: - Bulk Cleanup Tests
+
+    func testDeleteOrphanSessions() throws {
+        let tasksDir = tempDir.appendingPathComponent("tasks")
+
+        // Create an orphan (empty) session
+        let emptySession = tasksDir.appendingPathComponent("empty-orphan")
+        try FileManager.default.createDirectory(at: emptySession, withIntermediateDirectories: true)
+
+        // Create an orphan (all completed) session
+        let completedSession = tasksDir.appendingPathComponent("completed-orphan")
+        try FileManager.default.createDirectory(at: completedSession, withIntermediateDirectories: true)
+        try """
+        {"id": "1", "subject": "Done", "status": "completed"}
+        """.write(to: completedSession.appendingPathComponent("1.json"), atomically: true, encoding: .utf8)
+
+        // Create a non-orphan (pending task, has project) session
+        let activeSession = tasksDir.appendingPathComponent("active-session")
+        try FileManager.default.createDirectory(at: activeSession, withIntermediateDirectories: true)
+        try """
+        {"id": "1", "subject": "Active", "status": "in_progress"}
+        """.write(to: activeSession.appendingPathComponent("1.json"), atomically: true, encoding: .utf8)
+
+        // Create matching project for active session
+        let projectDir = tempDir.appendingPathComponent("projects/-test-project")
+        try FileManager.default.createDirectory(at: projectDir, withIntermediateDirectories: true)
+        try """
+        {"type":"custom-title","customTitle":"Active"}
+        """.write(to: projectDir.appendingPathComponent("active-session.jsonl"), atomically: true, encoding: .utf8)
+
+        sessionManager.loadSessions()
+
+        // Verify initial state
+        XCTAssertEqual(sessionManager.sessions.count, 3)
+        XCTAssertEqual(sessionManager.orphanCount(), 2) // empty + completed
+
+        // Delete orphans
+        let deleted = sessionManager.deleteOrphanSessions()
+
+        XCTAssertEqual(deleted, 2)
+        XCTAssertEqual(sessionManager.sessions.count, 1)
+        XCTAssertEqual(sessionManager.sessions.first?.id, "active-session")
+    }
+
+    func testDeleteCompletedSessions() throws {
+        let tasksDir = tempDir.appendingPathComponent("tasks")
+
+        // Create completed session
+        let completedSession = tasksDir.appendingPathComponent("completed-1")
+        try FileManager.default.createDirectory(at: completedSession, withIntermediateDirectories: true)
+        try """
+        {"id": "1", "subject": "Done", "status": "completed"}
+        """.write(to: completedSession.appendingPathComponent("1.json"), atomically: true, encoding: .utf8)
+
+        // Create in-progress session
+        let activeSession = tasksDir.appendingPathComponent("active-1")
+        try FileManager.default.createDirectory(at: activeSession, withIntermediateDirectories: true)
+        try """
+        {"id": "1", "subject": "Working", "status": "in_progress"}
+        """.write(to: activeSession.appendingPathComponent("1.json"), atomically: true, encoding: .utf8)
+
+        sessionManager.loadSessions()
+        XCTAssertEqual(sessionManager.completedSessionCount, 1)
+
+        let deleted = sessionManager.deleteCompletedSessions()
+
+        XCTAssertEqual(deleted, 1)
+        XCTAssertEqual(sessionManager.sessions.count, 1)
+        XCTAssertEqual(sessionManager.sessions.first?.id, "active-1")
+    }
+
+    func testOrphanCountWithConfigurableAge() throws {
+        let tasksDir = tempDir.appendingPathComponent("tasks")
+
+        // Create a session (will be recent, so not age-orphaned)
+        let recentSession = tasksDir.appendingPathComponent("recent-session")
+        try FileManager.default.createDirectory(at: recentSession, withIntermediateDirectories: true)
+        try """
+        {"id": "1", "subject": "Test", "status": "pending"}
+        """.write(to: recentSession.appendingPathComponent("1.json"), atomically: true, encoding: .utf8)
+
+        sessionManager.loadSessions()
+
+        // With default age (30 days), session is orphan because no project
+        XCTAssertEqual(sessionManager.orphanCount(ageDays: 30), 1)
+
+        // Session should still be orphan at any age because it has no project
+        XCTAssertEqual(sessionManager.orphanCount(ageDays: 7), 1)
+    }
 }

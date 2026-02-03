@@ -80,25 +80,34 @@ The app bundle will be at `build/Glimpse.app`.
 ### Deleting Orphaned Sessions
 
 Sessions are automatically marked as "orphaned" when they:
-- Are older than 30 days
+- Are older than configurable threshold (default: 30 days)
 - Have no matching project in `~/.claude/projects/`
 - Have all tasks completed
+- Have no tasks (empty sessions)
 
-To delete a session:
+**To delete individual sessions:**
 1. Click the session dropdown to expand the session list
 2. Hover over a session to reveal the delete (trash) icon
 3. Click the trash icon and confirm deletion
+
+**To bulk cleanup all orphans:**
+1. Click the 🗑️ trash icon with count in the footer (next to settings)
+2. Confirm deletion of all orphan sessions
 
 Orphaned sessions show a yellow "orphan" badge for easy identification.
 
 ### Preferences
 
-Access via right-click menu or **Cmd + ,**:
+Access via the ⚙️ gear icon in the footer or right-click menu:
 
 | Setting | Description |
 |---------|-------------|
 | Claude Directory | Path to your `.claude` folder (default: `~/.claude`) |
 | Notifications | Toggle alerts for task/session completion |
+| **Session Cleanup** | |
+| Auto-remove completed | Automatically delete completed sessions on launch |
+| Stale session age | Days before a session is considered stale (7-90, default: 30) |
+| Cleanup Orphans | Button to delete all orphan sessions at once |
 | Theme | System, Light, or Dark mode |
 
 ## Development

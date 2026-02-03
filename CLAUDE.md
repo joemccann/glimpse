@@ -153,3 +153,4 @@ rm -rf ~/.claude/projects/-Users-joemccann-dev-apps-mock-project
 ## Aliases
 
 - **cmbp**: Commit changes, pull main, merge main into current branch, bump version, push to GitHub, delete feature branch.
+- **progress**: Create or update PROGRESS.md with details of the latest session updates, changes made, and any TODOs.
