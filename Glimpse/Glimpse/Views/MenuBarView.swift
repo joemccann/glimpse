@@ -9,6 +9,8 @@ struct MenuBarView: View {
     @State private var searchText = ""
     @State private var sessionToDelete: Session?
     @State private var showSessionList = false
+    @State private var showCleanupConfirmation = false
+    @AppStorage("orphanAgeDays") private var orphanAgeDays = 30
 
     @Environment(\.colorScheme) var colorScheme
 
@@ -40,6 +42,10 @@ struct MenuBarView: View {
 
     private var borderColor: Color {
         colorScheme == .dark ? Theme.darkBorder : Theme.lightBorder
+    }
+
+    private var orphanCount: Int {
+        sessionManager.sessions.filter { $0.isOrphan(ageDays: orphanAgeDays) }.count
     }
 
     private var currentTasks: [Task] {
@@ -176,15 +182,39 @@ struct MenuBarView: View {
 
                 Spacer()
 
-                Button(action: {
-                    AppDelegate.shared?.openPreferences()
-                }) {
-                    Image(systemName: "gearshape")
-                        .font(.system(size: 14))
-                        .foregroundColor(textSecondary)
+                HStack(spacing: 12) {
+                    // Cleanup orphans button
+                    Button(action: {
+                        if orphanCount > 0 {
+                            showCleanupConfirmation = true
+                        }
+                    }) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "trash")
+                                .font(.system(size: 13))
+                            if orphanCount > 0 {
+                                Text("\(orphanCount)")
+                                    .font(.caption2)
+                                    .fontWeight(.medium)
+                            }
+                        }
+                        .foregroundColor(orphanCount > 0 ? Theme.warning : textSecondary.opacity(0.5))
+                    }
+                    .buttonStyle(.plain)
+                    .help(orphanCount > 0 ? "Cleanup \(orphanCount) orphan session(s)" : "No orphan sessions")
+                    .disabled(orphanCount == 0)
+
+                    // Preferences button
+                    Button(action: {
+                        AppDelegate.shared?.openPreferences()
+                    }) {
+                        Image(systemName: "gearshape")
+                            .font(.system(size: 14))
+                            .foregroundColor(textSecondary)
+                    }
+                    .buttonStyle(.plain)
+                    .help("Preferences")
                 }
-                .buttonStyle(.plain)
-                .help("Preferences")
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
@@ -222,6 +252,19 @@ struct MenuBarView: View {
                 }
             )
         }
+        .alert("Cleanup Orphan Sessions", isPresented: $showCleanupConfirmation) {
+            Button("Cancel", role: .cancel) {}
+            Button("Delete \(orphanCount) Sessions", role: .destructive) {
+                performCleanup()
+            }
+        } message: {
+            Text("This will permanently delete \(orphanCount) orphan session(s) including empty sessions, completed sessions, and sessions older than \(orphanAgeDays) days.")
+        }
+    }
+
+    private func performCleanup() {
+        let deleted = sessionManager.deleteOrphanSessions(ageDays: orphanAgeDays)
+        print("Cleaned up \(deleted) orphan session(s)")
     }
 
     private func deleteSession(_ session: Session) {
