@@ -6,7 +6,25 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var popover: NSPopover?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        performAutoCleanupIfEnabled()
         setupMenuBar()
+    }
+
+    /// Auto-cleanup completed sessions on launch if enabled in preferences
+    private func performAutoCleanupIfEnabled() {
+        let autoRemove = UserDefaults.standard.bool(forKey: "autoRemoveCompletedSessions")
+        guard autoRemove else { return }
+
+        let claudeDirectory = UserDefaults.standard.string(forKey: "claudeDirectory")
+            ?? FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".claude").path
+
+        let sessionManager = SessionManager(claudeDirectory: claudeDirectory)
+        sessionManager.loadSessions()
+        let deleted = sessionManager.deleteCompletedSessions()
+
+        if deleted > 0 {
+            print("Auto-cleanup: Removed \(deleted) completed session(s)")
+        }
     }
 
     private func setupMenuBar() {

@@ -179,6 +179,65 @@ class SessionManager: ObservableObject {
         loadSessions()
     }
 
+    /// Delete all orphan sessions (stale, no project, or completed)
+    /// - Parameter ageDays: Age threshold in days for stale sessions
+    /// - Returns: Number of sessions deleted
+    @discardableResult
+    func deleteOrphanSessions(ageDays: Int = Session.defaultOrphanAgeDays) -> Int {
+        let orphans = sessions.filter { $0.isOrphan(ageDays: ageDays) }
+        var deletedCount = 0
+
+        for session in orphans {
+            do {
+                let sessionPath = (tasksDirectory as NSString).appendingPathComponent(session.id)
+                try fileManager.removeItem(atPath: sessionPath)
+                deletedCount += 1
+            } catch {
+                print("Failed to delete orphan session \(session.id): \(error)")
+            }
+        }
+
+        if deletedCount > 0 {
+            loadSessions()
+        }
+
+        return deletedCount
+    }
+
+    /// Delete all sessions where all tasks are completed
+    /// - Returns: Number of sessions deleted
+    @discardableResult
+    func deleteCompletedSessions() -> Int {
+        let completed = sessions.filter { $0.isAllCompleted }
+        var deletedCount = 0
+
+        for session in completed {
+            do {
+                let sessionPath = (tasksDirectory as NSString).appendingPathComponent(session.id)
+                try fileManager.removeItem(atPath: sessionPath)
+                deletedCount += 1
+            } catch {
+                print("Failed to delete completed session \(session.id): \(error)")
+            }
+        }
+
+        if deletedCount > 0 {
+            loadSessions()
+        }
+
+        return deletedCount
+    }
+
+    /// Count of orphan sessions
+    func orphanCount(ageDays: Int = Session.defaultOrphanAgeDays) -> Int {
+        sessions.filter { $0.isOrphan(ageDays: ageDays) }.count
+    }
+
+    /// Count of completed sessions
+    var completedSessionCount: Int {
+        sessions.filter { $0.isAllCompleted }.count
+    }
+
     private func loadSessionMetadata() -> [String: SessionMetadata] {
         var metadata: [String: SessionMetadata] = [:]
 

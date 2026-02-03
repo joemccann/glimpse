@@ -29,16 +29,28 @@ struct Session: Identifiable, Equatable {
         taskCount > 0 && completed == taskCount
     }
 
+    /// Default orphan age threshold in days
+    static let defaultOrphanAgeDays = 30
+
     var isOrphan: Bool {
-        // Orphan if: older than 30 days, OR no matching project, OR all completed
-        daysSinceModified > 30 || !hasMatchingProject || isAllCompleted
+        isOrphan(ageDays: Self.defaultOrphanAgeDays)
+    }
+
+    /// Check if session is orphaned with configurable age threshold
+    func isOrphan(ageDays: Int) -> Bool {
+        daysSinceModified > ageDays || !hasMatchingProject || isAllCompleted
     }
 
     var orphanReason: String? {
+        orphanReason(ageDays: Self.defaultOrphanAgeDays)
+    }
+
+    /// Get orphan reason with configurable age threshold
+    func orphanReason(ageDays: Int) -> String? {
         if !hasMatchingProject {
             return "No matching project"
-        } else if daysSinceModified > 30 {
-            return "Older than 30 days"
+        } else if daysSinceModified > ageDays {
+            return "Older than \(ageDays) days"
         } else if isAllCompleted {
             return "All tasks completed"
         }
